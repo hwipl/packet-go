@@ -53,7 +53,7 @@ type TCPConn struct {
 	packets [][]byte
 }
 
-func (c *TCPConn) createSegment(sender, receiver *TCPPeer, payload []byte) {
+func (c *TCPConn) createPacket(sender, receiver *TCPPeer, payload []byte) {
 	// prepare creation of fake packet
 	opts := gopacket.SerializeOptions{
 		FixLengths:       true,
@@ -127,7 +127,7 @@ func (c *TCPConn) connect() {
 	c.client.flags.fin = false
 	c.client.ack = uint32(0)
 	c.client.options = c.options.syn
-	c.createSegment(c.client, c.server, nil)
+	c.createPacket(c.client, c.server, nil)
 	c.client.seq += 1
 
 	// create fake SYN, ACK packet
@@ -136,7 +136,7 @@ func (c *TCPConn) connect() {
 	c.server.flags.fin = false
 	c.server.ack = c.client.seq
 	c.server.options = c.options.synack
-	c.createSegment(c.server, c.client, nil)
+	c.createPacket(c.server, c.client, nil)
 	c.server.seq += 1
 
 	// remove options from client and server
@@ -149,7 +149,7 @@ func (c *TCPConn) connect() {
 	c.client.flags.fin = false
 	c.client.ack = c.server.seq
 	//c.server.options = c.options
-	c.createSegment(c.client, c.server, nil)
+	c.createPacket(c.client, c.server, nil)
 }
 
 func (c *TCPConn) send(sender, receiver *TCPPeer, payload []byte) {
@@ -158,7 +158,7 @@ func (c *TCPConn) send(sender, receiver *TCPPeer, payload []byte) {
 	sender.flags.ack = true
 	sender.flags.fin = false
 	sender.ack = receiver.seq
-	c.createSegment(sender, receiver, payload)
+	c.createPacket(sender, receiver, payload)
 	sender.seq += uint32(len(payload))
 
 	// create fake ACK packet
@@ -166,7 +166,7 @@ func (c *TCPConn) send(sender, receiver *TCPPeer, payload []byte) {
 	receiver.flags.ack = true
 	receiver.flags.fin = false
 	receiver.ack = sender.seq
-	c.createSegment(receiver, sender, nil)
+	c.createPacket(receiver, sender, nil)
 }
 
 func (c *TCPConn) disconnect() {
@@ -175,7 +175,7 @@ func (c *TCPConn) disconnect() {
 	c.client.flags.ack = true
 	c.client.flags.fin = true
 	c.client.ack = c.server.seq
-	c.createSegment(c.client, c.server, nil)
+	c.createPacket(c.client, c.server, nil)
 	c.client.seq += 1
 
 	// create fake FIN, ACK packet
@@ -183,7 +183,7 @@ func (c *TCPConn) disconnect() {
 	c.server.flags.ack = true
 	c.server.flags.fin = true
 	c.server.ack = c.client.seq
-	c.createSegment(c.server, c.client, nil)
+	c.createPacket(c.server, c.client, nil)
 	c.server.seq += 1
 
 	// create fake ACK packet
@@ -191,7 +191,7 @@ func (c *TCPConn) disconnect() {
 	c.client.flags.ack = true
 	c.client.flags.fin = false
 	c.client.ack = c.server.seq
-	c.createSegment(c.client, c.server, nil)
+	c.createPacket(c.client, c.server, nil)
 }
 
 func NewTCPConn(client, server *TCPPeer) *TCPConn {
