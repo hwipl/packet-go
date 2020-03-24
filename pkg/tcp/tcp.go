@@ -45,6 +45,11 @@ func NewTCPPeer(mac, ip string, port uint16, isn uint32) *TCPPeer {
 type TCPConn struct {
 	client  *TCPPeer
 	server  *TCPPeer
+	options struct {
+		syn    []layers.TCPOption
+		synack []layers.TCPOption
+		ack    []layers.TCPOption
+	}
 	packets [][]byte
 }
 
@@ -121,6 +126,7 @@ func (c *TCPConn) connect() {
 	c.client.flags.ack = false
 	c.client.flags.fin = false
 	c.client.ack = uint32(0)
+	c.client.options = c.options.syn
 	c.createSegment(c.client, c.server, nil)
 	c.client.seq += 1
 
@@ -129,14 +135,20 @@ func (c *TCPConn) connect() {
 	c.server.flags.ack = true
 	c.server.flags.fin = false
 	c.server.ack = c.client.seq
+	c.server.options = c.options.synack
 	c.createSegment(c.server, c.client, nil)
 	c.server.seq += 1
+
+	// remove options from client and server
+	c.client.options = c.options.ack
+	c.server.options = c.options.ack
 
 	// create fake ACK packet
 	c.client.flags.syn = false
 	c.client.flags.ack = true
 	c.client.flags.fin = false
 	c.client.ack = c.server.seq
+	//c.server.options = c.options
 	c.createSegment(c.client, c.server, nil)
 }
 
