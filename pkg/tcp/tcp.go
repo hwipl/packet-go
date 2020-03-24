@@ -45,8 +45,8 @@ func NewPeer(mac, ip string, port uint16, isn uint32) *Peer {
 	return &peer
 }
 
-// TCPConn stores a TCP connection
-type TCPConn struct {
+// Conn stores a TCP connection
+type Conn struct {
 	client  *Peer
 	server  *Peer
 	options struct {
@@ -59,7 +59,7 @@ type TCPConn struct {
 
 // createPacket creates a TCP packet between the TCP peers sender and receiver
 // that contains payload
-func (c *TCPConn) createPacket(sender, receiver *Peer, payload []byte) {
+func (c *Conn) createPacket(sender, receiver *Peer, payload []byte) {
 	// prepare creation of fake packet
 	opts := gopacket.SerializeOptions{
 		FixLengths:       true,
@@ -128,7 +128,7 @@ func (c *TCPConn) createPacket(sender, receiver *Peer, payload []byte) {
 
 // Connect creates the packets of the three way handshake between the peers of
 // the TCP connection
-func (c *TCPConn) Connect() {
+func (c *Conn) Connect() {
 	// create fake SYN packet
 	c.client.flags.syn = true
 	c.client.flags.ack = false
@@ -162,7 +162,7 @@ func (c *TCPConn) Connect() {
 
 // Send creates packets for the payload sent from sender to receiver and its
 // acknowledgment for the TCP connection
-func (c *TCPConn) Send(sender, receiver *Peer, payload []byte) {
+func (c *Conn) Send(sender, receiver *Peer, payload []byte) {
 	// create fake payload packet
 	sender.flags.syn = false
 	sender.flags.ack = true
@@ -181,7 +181,7 @@ func (c *TCPConn) Send(sender, receiver *Peer, payload []byte) {
 
 // Disconnect creates the packets for a client side initiated TCP connection
 // termination
-func (c *TCPConn) Disconnect() {
+func (c *Conn) Disconnect() {
 	// create fake FIN, ACK packet
 	c.client.flags.syn = false
 	c.client.flags.ack = true
@@ -206,9 +206,9 @@ func (c *TCPConn) Disconnect() {
 	c.createPacket(c.client, c.server, nil)
 }
 
-// NewTCPConn creates a new TCP connection between the peers client and server
-func NewTCPConn(client, server *Peer) *TCPConn {
-	conn := TCPConn{
+// NewConn creates a new TCP connection between the peers client and server
+func NewConn(client, server *Peer) *Conn {
+	conn := Conn{
 		client: client,
 		server: server,
 	}
