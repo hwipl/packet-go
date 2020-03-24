@@ -83,7 +83,7 @@ type Conn struct {
 // createPacket creates a TCP packet between the TCP peers sender and receiver
 // that contains payload
 func (c *Conn) createPacket(sender, receiver *Peer, payload []byte) {
-	// prepare creation of fake packet
+	// prepare creation of packet
 	opts := gopacket.SerializeOptions{
 		FixLengths:       true,
 		ComputeChecksums: true,
@@ -152,7 +152,7 @@ func (c *Conn) createPacket(sender, receiver *Peer, payload []byte) {
 // Connect creates the packets of the three way handshake between the peers of
 // the TCP connection
 func (c *Conn) Connect() {
-	// create fake SYN packet
+	// create SYN packet
 	c.Client.Flags.SYN = true
 	c.Client.Flags.ACK = false
 	c.Client.Flags.FIN = false
@@ -161,7 +161,7 @@ func (c *Conn) Connect() {
 	c.createPacket(c.Client, c.Server, nil)
 	c.Client.Seq++
 
-	// create fake SYN, ACK packet
+	// create SYN, ACK packet
 	c.Server.Flags.SYN = true
 	c.Server.Flags.ACK = true
 	c.Server.Flags.FIN = false
@@ -174,7 +174,7 @@ func (c *Conn) Connect() {
 	c.Client.Options = c.Options.ACK
 	c.Server.Options = c.Options.ACK
 
-	// create fake ACK packet
+	// create ACK packet
 	c.Client.Flags.SYN = false
 	c.Client.Flags.ACK = true
 	c.Client.Flags.FIN = false
@@ -186,7 +186,7 @@ func (c *Conn) Connect() {
 // Send creates packets for the payload sent from sender to receiver and its
 // acknowledgment for the TCP connection
 func (c *Conn) Send(sender, receiver *Peer, payload []byte) {
-	// create fake payload packet
+	// create payload packet
 	sender.Flags.SYN = false
 	sender.Flags.ACK = true
 	sender.Flags.FIN = false
@@ -194,7 +194,7 @@ func (c *Conn) Send(sender, receiver *Peer, payload []byte) {
 	c.createPacket(sender, receiver, payload)
 	sender.Seq += uint32(len(payload))
 
-	// create fake ACK packet
+	// create ACK packet
 	receiver.Flags.SYN = false
 	receiver.Flags.ACK = true
 	receiver.Flags.FIN = false
@@ -205,7 +205,7 @@ func (c *Conn) Send(sender, receiver *Peer, payload []byte) {
 // Disconnect creates the packets for a client side initiated TCP connection
 // termination
 func (c *Conn) Disconnect() {
-	// create fake FIN, ACK packet
+	// create FIN, ACK packet
 	c.Client.Flags.SYN = false
 	c.Client.Flags.ACK = true
 	c.Client.Flags.FIN = true
@@ -213,7 +213,7 @@ func (c *Conn) Disconnect() {
 	c.createPacket(c.Client, c.Server, nil)
 	c.Client.Seq++
 
-	// create fake FIN, ACK packet
+	// create FIN, ACK packet
 	c.Server.Flags.SYN = false
 	c.Server.Flags.ACK = true
 	c.Server.Flags.FIN = true
@@ -221,7 +221,7 @@ func (c *Conn) Disconnect() {
 	c.createPacket(c.Server, c.Client, nil)
 	c.Server.Seq++
 
-	// create fake ACK packet
+	// create ACK packet
 	c.Client.Flags.SYN = false
 	c.Client.Flags.ACK = true
 	c.Client.Flags.FIN = false
