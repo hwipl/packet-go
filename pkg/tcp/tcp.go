@@ -47,13 +47,23 @@ func NewPeer(mac, ip string, port uint16, isn uint32) *Peer {
 
 // Conn stores a TCP connection
 type Conn struct {
-	Client  *Peer
-	Server  *Peer
+	// Client is the client initiating and terminating this connection
+	Client *Peer
+
+	// Server is the server end of this connection
+	Server *Peer
+
+	// Options contains TCP options for different states of the TCP
+	// connection: SYN stores the options for the initial SYN packet,
+	// SYNACK for the SYNACK packet, ACK for the ACK packet and the
+	// remainder of this connection
 	Options struct {
 		SYN    []layers.TCPOption
 		SYNACK []layers.TCPOption
 		ACK    []layers.TCPOption
 	}
+
+	// Packets is a list of all packets as byte slices in this connection
 	Packets [][]byte
 }
 
