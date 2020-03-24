@@ -127,9 +127,9 @@ func (c *TCPConn) createPacket(sender, receiver *TCPPeer, payload []byte) {
 	c.packets = packets
 }
 
-// connect creates the packets of the three way handshake between the peers of
+// Connect creates the packets of the three way handshake between the peers of
 // the TCP connection
-func (c *TCPConn) connect() {
+func (c *TCPConn) Connect() {
 	// create fake SYN packet
 	c.client.flags.syn = true
 	c.client.flags.ack = false
