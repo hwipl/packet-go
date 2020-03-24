@@ -8,6 +8,7 @@ import (
 	"github.com/google/gopacket/layers"
 )
 
+// TCPPeer stores a peer of a TCP connection
 type TCPPeer struct {
 	mac   net.HardwareAddr
 	ip    net.IP
@@ -22,6 +23,9 @@ type TCPPeer struct {
 	options []layers.TCPOption
 }
 
+// NewTCPPeer creates a new peer of a tcp connection with the MAC address mac,
+// the IP address ip, the TCP port port, and the TCP initial sequence number
+// isn
 func NewTCPPeer(mac, ip string, port uint16, isn uint32) *TCPPeer {
 	// parse mac address
 	macAddr, err := net.ParseMAC(mac)
@@ -42,6 +46,7 @@ func NewTCPPeer(mac, ip string, port uint16, isn uint32) *TCPPeer {
 	return &peer
 }
 
+// TCPConn stores a TCP connection
 type TCPConn struct {
 	client  *TCPPeer
 	server  *TCPPeer
@@ -53,6 +58,8 @@ type TCPConn struct {
 	packets [][]byte
 }
 
+// createPacket creates a TCP packet between the TCP peers sender and receiver
+// that contains payload
 func (c *TCPConn) createPacket(sender, receiver *TCPPeer, payload []byte) {
 	// prepare creation of fake packet
 	opts := gopacket.SerializeOptions{
@@ -120,6 +127,8 @@ func (c *TCPConn) createPacket(sender, receiver *TCPPeer, payload []byte) {
 	c.packets = packets
 }
 
+// connect creates the packets of the three way handshake between the peers of
+// the TCP connection
 func (c *TCPConn) connect() {
 	// create fake SYN packet
 	c.client.flags.syn = true
@@ -152,6 +161,8 @@ func (c *TCPConn) connect() {
 	c.createPacket(c.client, c.server, nil)
 }
 
+// send creates packets for the payload sent from sender to receiver and its
+// acknowledgment for the TCP connection
 func (c *TCPConn) send(sender, receiver *TCPPeer, payload []byte) {
 	// create fake payload packet
 	sender.flags.syn = false
@@ -169,6 +180,8 @@ func (c *TCPConn) send(sender, receiver *TCPPeer, payload []byte) {
 	c.createPacket(receiver, sender, nil)
 }
 
+// disconnect creates the packets for a client side initiated TCP connection
+// termination
 func (c *TCPConn) disconnect() {
 	// create fake FIN, ACK packet
 	c.client.flags.syn = false
@@ -194,6 +207,7 @@ func (c *TCPConn) disconnect() {
 	c.createPacket(c.client, c.server, nil)
 }
 
+// NewTCPConn creates a new TCP connection between the peers client and server
 func NewTCPConn(client, server *TCPPeer) *TCPConn {
 	conn := TCPConn{
 		client: client,
