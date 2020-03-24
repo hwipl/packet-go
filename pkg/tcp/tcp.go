@@ -47,14 +47,14 @@ func NewPeer(mac, ip string, port uint16, isn uint32) *Peer {
 
 // Conn stores a TCP connection
 type Conn struct {
-	client  *Peer
-	server  *Peer
-	options struct {
-		syn    []layers.TCPOption
-		synack []layers.TCPOption
-		ack    []layers.TCPOption
+	Client  *Peer
+	Server  *Peer
+	Options struct {
+		SYN    []layers.TCPOption
+		SYNACK []layers.TCPOption
+		ACK    []layers.TCPOption
 	}
-	packets [][]byte
+	Packets [][]byte
 }
 
 // createPacket creates a TCP packet between the TCP peers sender and receiver
@@ -118,46 +118,46 @@ func (c *Conn) createPacket(sender, receiver *Peer, payload []byte) {
 	}
 
 	// append packet to the list of all packets
-	packets := make([][]byte, len(c.packets)+1)
-	for i, p := range c.packets {
+	packets := make([][]byte, len(c.Packets)+1)
+	for i, p := range c.Packets {
 		packets[i] = p
 	}
 	packets[len(packets)-1] = buf.Bytes()
-	c.packets = packets
+	c.Packets = packets
 }
 
 // Connect creates the packets of the three way handshake between the peers of
 // the TCP connection
 func (c *Conn) Connect() {
 	// create fake SYN packet
-	c.client.flags.syn = true
-	c.client.flags.ack = false
-	c.client.flags.fin = false
-	c.client.ack = uint32(0)
-	c.client.options = c.options.syn
-	c.createPacket(c.client, c.server, nil)
-	c.client.seq++
+	c.Client.flags.syn = true
+	c.Client.flags.ack = false
+	c.Client.flags.fin = false
+	c.Client.ack = uint32(0)
+	c.Client.options = c.Options.SYN
+	c.createPacket(c.Client, c.Server, nil)
+	c.Client.seq++
 
 	// create fake SYN, ACK packet
-	c.server.flags.syn = true
-	c.server.flags.ack = true
-	c.server.flags.fin = false
-	c.server.ack = c.client.seq
-	c.server.options = c.options.synack
-	c.createPacket(c.server, c.client, nil)
-	c.server.seq++
+	c.Server.flags.syn = true
+	c.Server.flags.ack = true
+	c.Server.flags.fin = false
+	c.Server.ack = c.Client.seq
+	c.Server.options = c.Options.SYNACK
+	c.createPacket(c.Server, c.Client, nil)
+	c.Server.seq++
 
 	// remove options from client and server
-	c.client.options = c.options.ack
-	c.server.options = c.options.ack
+	c.Client.options = c.Options.ACK
+	c.Server.options = c.Options.ACK
 
 	// create fake ACK packet
-	c.client.flags.syn = false
-	c.client.flags.ack = true
-	c.client.flags.fin = false
-	c.client.ack = c.server.seq
+	c.Client.flags.syn = false
+	c.Client.flags.ack = true
+	c.Client.flags.fin = false
+	c.Client.ack = c.Server.seq
 	//c.server.options = c.options
-	c.createPacket(c.client, c.server, nil)
+	c.createPacket(c.Client, c.Server, nil)
 }
 
 // Send creates packets for the payload sent from sender to receiver and its
@@ -183,34 +183,34 @@ func (c *Conn) Send(sender, receiver *Peer, payload []byte) {
 // termination
 func (c *Conn) Disconnect() {
 	// create fake FIN, ACK packet
-	c.client.flags.syn = false
-	c.client.flags.ack = true
-	c.client.flags.fin = true
-	c.client.ack = c.server.seq
-	c.createPacket(c.client, c.server, nil)
-	c.client.seq++
+	c.Client.flags.syn = false
+	c.Client.flags.ack = true
+	c.Client.flags.fin = true
+	c.Client.ack = c.Server.seq
+	c.createPacket(c.Client, c.Server, nil)
+	c.Client.seq++
 
 	// create fake FIN, ACK packet
-	c.server.flags.syn = false
-	c.server.flags.ack = true
-	c.server.flags.fin = true
-	c.server.ack = c.client.seq
-	c.createPacket(c.server, c.client, nil)
-	c.server.seq++
+	c.Server.flags.syn = false
+	c.Server.flags.ack = true
+	c.Server.flags.fin = true
+	c.Server.ack = c.Client.seq
+	c.createPacket(c.Server, c.Client, nil)
+	c.Server.seq++
 
 	// create fake ACK packet
-	c.client.flags.syn = false
-	c.client.flags.ack = true
-	c.client.flags.fin = false
-	c.client.ack = c.server.seq
-	c.createPacket(c.client, c.server, nil)
+	c.Client.flags.syn = false
+	c.Client.flags.ack = true
+	c.Client.flags.fin = false
+	c.Client.ack = c.Server.seq
+	c.createPacket(c.Client, c.Server, nil)
 }
 
 // NewConn creates a new TCP connection between the peers client and server
 func NewConn(client, server *Peer) *Conn {
 	conn := Conn{
-		client: client,
-		server: server,
+		Client: client,
+		Server: server,
 	}
 	return &conn
 }
