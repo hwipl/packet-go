@@ -10,16 +10,29 @@ import (
 
 // Peer stores a peer of a TCP connection
 type Peer struct {
-	MAC   net.HardwareAddr
-	IP    net.IP
-	Port  uint16
-	Seq   uint32
-	Ack   uint32
+	// MAC is the MAC address of this peer
+	MAC net.HardwareAddr
+
+	// IP is the IP address of this peer
+	IP net.IP
+
+	// Port is the TCP port of this peer
+	Port uint16
+
+	// Seq is the current sequence number of this peer
+	Seq uint32
+
+	// Ack is the sequence number this peer should acknowledge
+	Ack uint32
+
+	// Flags stores the TCP flags to be used in packets
 	Flags struct {
 		SYN bool
 		ACK bool
 		FIN bool
 	}
+
+	// Options stores the TCP options to be used in packets
 	Options []layers.TCPOption
 }
 
