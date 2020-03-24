@@ -180,9 +180,9 @@ func (c *TCPConn) Send(sender, receiver *TCPPeer, payload []byte) {
 	c.createPacket(receiver, sender, nil)
 }
 
-// disconnect creates the packets for a client side initiated TCP connection
+// Disconnect creates the packets for a client side initiated TCP connection
 // termination
-func (c *TCPConn) disconnect() {
+func (c *TCPConn) Disconnect() {
 	// create fake FIN, ACK packet
 	c.client.flags.syn = false
 	c.client.flags.ack = true
