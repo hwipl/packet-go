@@ -161,9 +161,9 @@ func (c *TCPConn) Connect() {
 	c.createPacket(c.client, c.server, nil)
 }
 
-// send creates packets for the payload sent from sender to receiver and its
+// Send creates packets for the payload sent from sender to receiver and its
 // acknowledgment for the TCP connection
-func (c *TCPConn) send(sender, receiver *TCPPeer, payload []byte) {
+func (c *TCPConn) Send(sender, receiver *TCPPeer, payload []byte) {
 	// create fake payload packet
 	sender.flags.syn = false
 	sender.flags.ack = true
