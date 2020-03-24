@@ -136,7 +136,7 @@ func (c *Conn) Connect() {
 	c.client.ack = uint32(0)
 	c.client.options = c.options.syn
 	c.createPacket(c.client, c.server, nil)
-	c.client.seq += 1
+	c.client.seq++
 
 	// create fake SYN, ACK packet
 	c.server.flags.syn = true
@@ -145,7 +145,7 @@ func (c *Conn) Connect() {
 	c.server.ack = c.client.seq
 	c.server.options = c.options.synack
 	c.createPacket(c.server, c.client, nil)
-	c.server.seq += 1
+	c.server.seq++
 
 	// remove options from client and server
 	c.client.options = c.options.ack
@@ -188,7 +188,7 @@ func (c *Conn) Disconnect() {
 	c.client.flags.fin = true
 	c.client.ack = c.server.seq
 	c.createPacket(c.client, c.server, nil)
-	c.client.seq += 1
+	c.client.seq++
 
 	// create fake FIN, ACK packet
 	c.server.flags.syn = false
@@ -196,7 +196,7 @@ func (c *Conn) Disconnect() {
 	c.server.flags.fin = true
 	c.server.ack = c.client.seq
 	c.createPacket(c.server, c.client, nil)
-	c.server.seq += 1
+	c.server.seq++
 
 	// create fake ACK packet
 	c.client.flags.syn = false
