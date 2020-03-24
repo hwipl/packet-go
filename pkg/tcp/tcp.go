@@ -10,17 +10,17 @@ import (
 
 // Peer stores a peer of a TCP connection
 type Peer struct {
-	mac   net.HardwareAddr
-	ip    net.IP
-	port  uint16
-	seq   uint32
-	ack   uint32
-	flags struct {
-		syn bool
-		ack bool
-		fin bool
+	MAC   net.HardwareAddr
+	IP    net.IP
+	Port  uint16
+	Seq   uint32
+	Ack   uint32
+	Flags struct {
+		SYN bool
+		ACK bool
+		FIN bool
 	}
-	options []layers.TCPOption
+	Options []layers.TCPOption
 }
 
 // NewPeer creates a new peer of a tcp connection with the MAC address mac, the
@@ -37,10 +37,10 @@ func NewPeer(mac, ip string, port uint16, isn uint32) *Peer {
 
 	// create and return peer
 	peer := Peer{
-		mac:  macAddr,
-		ip:   ipAddr,
-		port: port,
-		seq:  isn,
+		MAC:  macAddr,
+		IP:   ipAddr,
+		Port: port,
+		Seq:  isn,
 	}
 	return &peer
 }
@@ -68,8 +68,8 @@ func (c *Conn) createPacket(sender, receiver *Peer, payload []byte) {
 
 	// create ethernet header
 	eth := layers.Ethernet{
-		SrcMAC:       sender.mac,
-		DstMAC:       receiver.mac,
+		SrcMAC:       sender.MAC,
+		DstMAC:       receiver.MAC,
 		EthernetType: layers.EthernetTypeIPv4,
 	}
 
@@ -80,25 +80,25 @@ func (c *Conn) createPacket(sender, receiver *Peer, payload []byte) {
 		Id:       1, // TODO: update? remove?
 		TTL:      64,
 		Protocol: layers.IPProtocolTCP,
-		SrcIP:    sender.ip,
-		DstIP:    receiver.ip,
+		SrcIP:    sender.IP,
+		DstIP:    receiver.IP,
 	}
 	// create tcp header
 	tcp := layers.TCP{
-		SrcPort: layers.TCPPort(sender.port),
-		DstPort: layers.TCPPort(receiver.port),
-		SYN:     sender.flags.syn,
-		ACK:     sender.flags.ack,
-		FIN:     sender.flags.fin,
-		Seq:     sender.seq,
-		Ack:     sender.ack,
+		SrcPort: layers.TCPPort(sender.Port),
+		DstPort: layers.TCPPort(receiver.Port),
+		SYN:     sender.Flags.SYN,
+		ACK:     sender.Flags.ACK,
+		FIN:     sender.Flags.FIN,
+		Seq:     sender.Seq,
+		Ack:     sender.Ack,
 		Window:  64000,
 	}
 	tcp.SetNetworkLayerForChecksum(&ip)
 
 	// add tcp options if present
-	if sender.options != nil {
-		tcp.Options = sender.options
+	if sender.Options != nil {
+		tcp.Options = sender.Options
 	}
 
 	// serialize packet to buffer
@@ -130,32 +130,32 @@ func (c *Conn) createPacket(sender, receiver *Peer, payload []byte) {
 // the TCP connection
 func (c *Conn) Connect() {
 	// create fake SYN packet
-	c.Client.flags.syn = true
-	c.Client.flags.ack = false
-	c.Client.flags.fin = false
-	c.Client.ack = uint32(0)
-	c.Client.options = c.Options.SYN
+	c.Client.Flags.SYN = true
+	c.Client.Flags.ACK = false
+	c.Client.Flags.FIN = false
+	c.Client.Ack = uint32(0)
+	c.Client.Options = c.Options.SYN
 	c.createPacket(c.Client, c.Server, nil)
-	c.Client.seq++
+	c.Client.Seq++
 
 	// create fake SYN, ACK packet
-	c.Server.flags.syn = true
-	c.Server.flags.ack = true
-	c.Server.flags.fin = false
-	c.Server.ack = c.Client.seq
-	c.Server.options = c.Options.SYNACK
+	c.Server.Flags.SYN = true
+	c.Server.Flags.ACK = true
+	c.Server.Flags.FIN = false
+	c.Server.Ack = c.Client.Seq
+	c.Server.Options = c.Options.SYNACK
 	c.createPacket(c.Server, c.Client, nil)
-	c.Server.seq++
+	c.Server.Seq++
 
 	// remove options from client and server
-	c.Client.options = c.Options.ACK
-	c.Server.options = c.Options.ACK
+	c.Client.Options = c.Options.ACK
+	c.Server.Options = c.Options.ACK
 
 	// create fake ACK packet
-	c.Client.flags.syn = false
-	c.Client.flags.ack = true
-	c.Client.flags.fin = false
-	c.Client.ack = c.Server.seq
+	c.Client.Flags.SYN = false
+	c.Client.Flags.ACK = true
+	c.Client.Flags.FIN = false
+	c.Client.Ack = c.Server.Seq
 	//c.server.options = c.options
 	c.createPacket(c.Client, c.Server, nil)
 }
@@ -164,18 +164,18 @@ func (c *Conn) Connect() {
 // acknowledgment for the TCP connection
 func (c *Conn) Send(sender, receiver *Peer, payload []byte) {
 	// create fake payload packet
-	sender.flags.syn = false
-	sender.flags.ack = true
-	sender.flags.fin = false
-	sender.ack = receiver.seq
+	sender.Flags.SYN = false
+	sender.Flags.ACK = true
+	sender.Flags.FIN = false
+	sender.Ack = receiver.Seq
 	c.createPacket(sender, receiver, payload)
-	sender.seq += uint32(len(payload))
+	sender.Seq += uint32(len(payload))
 
 	// create fake ACK packet
-	receiver.flags.syn = false
-	receiver.flags.ack = true
-	receiver.flags.fin = false
-	receiver.ack = sender.seq
+	receiver.Flags.SYN = false
+	receiver.Flags.ACK = true
+	receiver.Flags.FIN = false
+	receiver.Ack = sender.Seq
 	c.createPacket(receiver, sender, nil)
 }
 
@@ -183,26 +183,26 @@ func (c *Conn) Send(sender, receiver *Peer, payload []byte) {
 // termination
 func (c *Conn) Disconnect() {
 	// create fake FIN, ACK packet
-	c.Client.flags.syn = false
-	c.Client.flags.ack = true
-	c.Client.flags.fin = true
-	c.Client.ack = c.Server.seq
+	c.Client.Flags.SYN = false
+	c.Client.Flags.ACK = true
+	c.Client.Flags.FIN = true
+	c.Client.Ack = c.Server.Seq
 	c.createPacket(c.Client, c.Server, nil)
-	c.Client.seq++
+	c.Client.Seq++
 
 	// create fake FIN, ACK packet
-	c.Server.flags.syn = false
-	c.Server.flags.ack = true
-	c.Server.flags.fin = true
-	c.Server.ack = c.Client.seq
+	c.Server.Flags.SYN = false
+	c.Server.Flags.ACK = true
+	c.Server.Flags.FIN = true
+	c.Server.Ack = c.Client.Seq
 	c.createPacket(c.Server, c.Client, nil)
-	c.Server.seq++
+	c.Server.Seq++
 
 	// create fake ACK packet
-	c.Client.flags.syn = false
-	c.Client.flags.ack = true
-	c.Client.flags.fin = false
-	c.Client.ack = c.Server.seq
+	c.Client.Flags.SYN = false
+	c.Client.Flags.ACK = true
+	c.Client.Flags.FIN = false
+	c.Client.Ack = c.Server.Seq
 	c.createPacket(c.Client, c.Server, nil)
 }
 
