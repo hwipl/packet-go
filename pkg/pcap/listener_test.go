@@ -25,6 +25,14 @@ func (th *testHandler) HandleTimer() {
 	th.timerHandled = true
 }
 
+func TestListenerGetFirstPcapInterface(t *testing.T) {
+	var listener Listener
+	listener.getFirstPcapInterface()
+	if listener.Device == "" {
+		t.Errorf("Device = \"\", want != \"\"")
+	}
+}
+
 func testListenerPcapCreateDumpFile() string {
 	// prepare creation of packet
 	opts := gopacket.SerializeOptions{
