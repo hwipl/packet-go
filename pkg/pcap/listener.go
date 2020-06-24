@@ -12,7 +12,7 @@ import (
 // Listener is a pcap listener that reads packets from a file or device and
 // calls Handlers for packets and timer events
 type Listener struct {
-	pcapHandle *pcap.Handle
+	PcapHandle *pcap.Handle
 
 	PacketHandler PacketHandler
 
@@ -60,13 +60,13 @@ func (l *Listener) Prepare() {
 		}
 
 		// open device
-		l.pcapHandle, pcapErr = pcap.OpenLive(l.Device,
+		l.PcapHandle, pcapErr = pcap.OpenLive(l.Device,
 			int32(l.Snaplen), l.Promisc, timeout)
 		startText = fmt.Sprintf("Listening on interface %s:\n",
 			l.Device)
 	} else {
 		// open pcap file
-		l.pcapHandle, pcapErr = pcap.OpenOffline(l.File)
+		l.PcapHandle, pcapErr = pcap.OpenOffline(l.File)
 		startText = fmt.Sprintf("Reading packets from file %s:\n",
 			l.File)
 	}
@@ -74,7 +74,7 @@ func (l *Listener) Prepare() {
 		log.Fatal(pcapErr)
 	}
 	if l.Filter != "" {
-		if err := l.pcapHandle.SetBPFFilter(l.Filter); err != nil {
+		if err := l.PcapHandle.SetBPFFilter(l.Filter); err != nil {
 			log.Fatal(pcapErr)
 		}
 	}
@@ -83,7 +83,7 @@ func (l *Listener) Prepare() {
 
 // Loop implements the listen loop for the listen function
 func (l *Listener) Loop() {
-	defer l.pcapHandle.Close()
+	defer l.PcapHandle.Close()
 
 	// make sure there is a packet handler
 	if l.PacketHandler == nil {
@@ -91,8 +91,8 @@ func (l *Listener) Loop() {
 	}
 
 	// Use the handle as a packet source to process all packets
-	packetSource := gopacket.NewPacketSource(l.pcapHandle,
-		l.pcapHandle.LinkType())
+	packetSource := gopacket.NewPacketSource(l.PcapHandle,
+		l.PcapHandle.LinkType())
 	packets := packetSource.Packets()
 
 	// setup timer and check timer handler
