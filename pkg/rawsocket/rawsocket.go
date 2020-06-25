@@ -31,7 +31,8 @@ func (r *RawSocket) Send(data []byte) {
 // NewRawSocket creates a new raw socket for device
 func NewRawSocket(device string) *RawSocket {
 	// create raw socket
-	fd, err := unix.Socket(unix.AF_PACKET, unix.SOCK_RAW, unix.ETH_P_ALL)
+	fd, err := unix.Socket(unix.AF_PACKET, unix.SOCK_RAW,
+		int(htons(unix.ETH_P_ALL)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +45,7 @@ func NewRawSocket(device string) *RawSocket {
 
 	// create sockaddr
 	addr := &unix.SockaddrLinklayer{
-		Protocol: unix.ETH_P_IP,
+		Protocol: htons(unix.ETH_P_IP),
 		Ifindex:  dev.Index,
 		Halen:    6,
 	}
