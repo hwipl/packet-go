@@ -75,7 +75,7 @@ func (l *Listener) Prepare() {
 	}
 	if l.Filter != "" {
 		if err := l.PcapHandle.SetBPFFilter(l.Filter); err != nil {
-			log.Fatal(pcapErr)
+			log.Fatal(err)
 		}
 	}
 	log.Printf(startText)
