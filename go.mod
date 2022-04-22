@@ -3,8 +3,8 @@ module github.com/hwipl/packet-go
 go 1.18
 
 require (
-	github.com/google/gopacket v1.1.17
-	golang.org/x/sys v0.0.0-20200523222454-059865788121
+	github.com/google/gopacket v1.1.19
+	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150
 )
 
-require golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3 // indirect
+require golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
