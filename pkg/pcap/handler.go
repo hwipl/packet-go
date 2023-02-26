@@ -1,6 +1,6 @@
 package pcap
 
-import "github.com/google/gopacket"
+import "github.com/gopacket/gopacket"
 
 // PacketHandler is the interface called by Listener for handling packets
 type PacketHandler interface {

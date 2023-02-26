@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/google/gopacket"
-	"github.com/google/gopacket/pcap"
+	"github.com/gopacket/gopacket"
+	"github.com/gopacket/gopacket/pcap"
 )
 
 // Listener is a pcap listener that reads packets from a file or device and
