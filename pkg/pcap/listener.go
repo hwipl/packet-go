@@ -78,7 +78,7 @@ func (l *Listener) Prepare() {
 			log.Fatal(err)
 		}
 	}
-	log.Printf(startText)
+	log.Print(startText)
 }
 
 // Loop implements the listen loop for the listen function
