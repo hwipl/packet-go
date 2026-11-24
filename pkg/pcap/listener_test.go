@@ -1,7 +1,6 @@
 package pcap
 
 import (
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -60,7 +59,7 @@ func testListenerPcapCreateDumpFile() string {
 	packet := buf.Bytes()
 
 	// create temporary pcap file
-	tmpFile, err := ioutil.TempFile("", "listener.pcap")
+	tmpFile, err := os.CreateTemp("", "listener.pcap")
 	if err != nil {
 		log.Fatal(err)
 	}
