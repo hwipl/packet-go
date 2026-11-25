@@ -63,15 +63,19 @@ func testListenerPcapCreateDumpFile() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer tmpFile.Close()
+	defer func() { _ = tmpFile.Close() }()
 
 	// write packets of fake tcp connection to pcap file
 	w := pcapgo.NewWriter(tmpFile)
-	w.WriteFileHeader(65536, layers.LinkTypeEthernet)
-	w.WritePacket(gopacket.CaptureInfo{
+	if err := w.WriteFileHeader(65536, layers.LinkTypeEthernet); err != nil {
+		log.Fatal(err)
+	}
+	if err := w.WritePacket(gopacket.CaptureInfo{
 		CaptureLength: len(packet),
 		Length:        len(packet),
-	}, packet)
+	}, packet); err != nil {
+		log.Fatal(err)
+	}
 
 	return tmpFile.Name()
 }
@@ -79,7 +83,7 @@ func testListenerPcapCreateDumpFile() string {
 func TestListenerPcap(t *testing.T) {
 	// create temporary pcap file
 	tmpFile := testListenerPcapCreateDumpFile()
-	defer os.Remove(tmpFile)
+	defer func() { _ = os.Remove(tmpFile) }()
 
 	// prepare listener
 	var testHandler testHandler
@@ -104,7 +108,7 @@ func TestListenPcapFilter(t *testing.T) {
 
 	// create temporary pcap file
 	tmpFile := testListenerPcapCreateDumpFile()
-	defer os.Remove(tmpFile)
+	defer func() { _ = os.Remove(tmpFile) }()
 
 	// prepare listener
 	var testHandler testHandler
