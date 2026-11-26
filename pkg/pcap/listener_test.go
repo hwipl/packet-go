@@ -16,7 +16,7 @@ type testHandler struct {
 	timerHandled  bool
 }
 
-func (th *testHandler) HandlePacket(packet gopacket.Packet) {
+func (th *testHandler) HandlePacket(_ gopacket.Packet) {
 	th.packetHandled = true
 }
 

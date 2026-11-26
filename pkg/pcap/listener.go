@@ -1,3 +1,4 @@
+// Package pcap contains pcap code.
 package pcap
 
 import (
