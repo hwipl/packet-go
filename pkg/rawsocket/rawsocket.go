@@ -1,3 +1,4 @@
+// Package rawsocket contains raw socket code.
 package rawsocket
 
 import (
@@ -17,7 +18,8 @@ type RawSocket struct {
 
 // Close closes the raw socket
 func (r *RawSocket) Close() {
-	unix.Close(r.fd)
+	// TODO return error?
+	_ = unix.Close(r.fd)
 }
 
 // Send sends data out of the raw socket
